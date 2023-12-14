@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Page Title</title>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+  <button id="getData">Your Pick</button>
+  <ul id="myList"></ul>
+
+
+  <button id="getData2">Enemy pick</button>
+  <ul id="myList"></ul>
+  <p>Your pick</p>
+  <div id="yourPick"></div>
+  <div id="yourHp"></div>
+  <div id="yourSkills"></div>
+  <div id="Yourdamage"></div>
+  <div id="yourRes"></div>
+<hr>
+  <p>Opponent pick</p>
+  <div id="enemyPick"></div>
+  <div id="EnemyHp"></div>
+  <div id="EnemySkills"></div>
+  <div id="Enemydamage"></div>
+  <div id="enemyRes"></div>
+
+  <script>
+    $('[name="myNameInput"]').on('change', function(){
+      console.log($('[name="myNameInput"]').val());
+    });
+
+    let yourHp = 1000;
+    let enemyHp = 1000;
+
+    let yourDmg = 0;
+    let enemyDmg = 0;
+
+    const newList = [];
+
+    $('#getData').on('click', function(){
+      console.log('I am working');
+      var catchThemAll = $.ajax({
+        method: 'GET',
+        url: 'https://pokeapi.co/api/v2/pokemon/',
+      }).done(function(data){
+        console.log(data.results);
+        let list = "";
+
+        data.results.map((item, key) => {
+          list += '<li>' + item.name + '<button onclick="getDetails(' + key + ')">Show Skills</button></li>';
+          newList.push(item);
+        }); 
+        $('#yourPick').html(list);
+      });
+    });
+
+    $('[name="myNameInput"]').on('change', function(){
+      console.log($('[name="myNameInput"]').val());
+    });
+
+    const newListt = [];
+
+    $('#getData2').on('click', function(){
+      console.log('I am working');
+      var catchThemAll = $.ajax({
+        method: 'GET',
+        url: 'https://pokeapi.co/api/v2/pokemon/',
+      }).done(function(data){
+        console.log(data.results);
+        let list2 = "";
+
+        data.results.map((item, key) => {
+          list2 += '<li>' + item.name + '<button onclick="getDetailsEnemy(' + key + ')">Show skill</button></li>';
+          newListt.push(item);
+        }); 
+        $('#enemyPick').html(list2);
+      });
+    });
+
+
+
+    function yourAttack(){
+       let res = enemyHp - yourDmg
+       enemyHp = res
+       updateEnemyDetails()
+       if (enemyHp <= 0){
+          document.getElementById("yourRes").innerHTML = "You win"
+       }
+
+
+    }
+
+    function enemyAttack(){
+      let res =   yourHp - enemyDmg
+      yourHp = res
+      updateYourDetails()
+      if (yourHp <= 0){
+          document.getElementById("enemyRes").innerHTML = "Enemy You win"
+       }
+  
+    }
+          
+    function updateEnemyDetails() {
+      let yourDetails = ""
+      yourDetails += '<p>Hp: ' + enemyHp + '</p>';
+      $('#enemyPick').html(yourDetails);
+    }
+
+    function updateYourDetails() {
+      let yourDetails = ""
+      yourDetails += '<p>Hp: ' + yourHp + '</p>';
+      $('#yourPick').html(yourDetails);
+    }
+
+
+    function getDetailsEnemy(id){
+      console.log(newList[id]);
+      let baseExpHTML =""
+      $.ajax({
+        method: 'GET',
+        url: newList[id].url
+      }).done(function (data){
+        console.log(data);
+
+        let enemyHero = newList[id].name; 
+        let enemyHero2 = '<p>Enemy Hero: ' + enemyHero + '</p>'; 
+        enemyHero2 += '<p>Hp: ' + enemyHp + '</p>';
+        $('#enemyPick').html(enemyHero2);
+
+        
+
+        let enemySkills = data.abilities.map(ability => ability.ability.name);
+        let skillsHTML = '<p>Enemy Skills: ' + enemySkills.join(', ') + '</p>';
+        $('#EnemySkills').html(skillsHTML);
+
+
+        let enemyBaseExp = data.base_experience;
+        let baseExpHTML = '<p>Enemy Base Experience: ' + enemyBaseExp + '</p>';
+        enemyDmg = enemyBaseExp
+        baseExpHTML +='<button onclick="enemyAttack()">Enemy Attack</button>'
+        $('#Enemydamage').html(baseExpHTML);
+
+
+      });
+    }
+
+    function getDetails(id){
+      console.log(newList[id]);
+      
+      let baseExpHTML = ""
+
+      $.ajax({
+        method: 'GET',
+        url: newList[id].url
+      }).done(function (data){
+        console.log(data);
+
+        let yourHero = newList[id].name; 
+        let yourname = '<p>Hero: ' + yourHero + '</p>';
+        yourname += '<p>Hp: ' + yourHp + '</p>';
+        $('#yourPick').html(yourname);
+
+        let yourSkill = data.abilities.map(ability => ability.ability.name);
+        let skillsHTML = '<p>Your Skills: ' + yourSkill.join(', ') + '</p>';
+        $('#yourSkills').html(skillsHTML);
+
+        let yourBaseExp = data.base_experience;
+        let baseExpHTML = '<p>Your Base Experience: ' + yourBaseExp + '</p>';
+        yourDmg = yourBaseExp
+        baseExpHTML +='<button onclick="yourAttack()">Attack</button>'
+        $('#Yourdamage').html(baseExpHTML);
+      });
+
+
+
+ 
+    }
+  </script>
+</body>
+</html>
